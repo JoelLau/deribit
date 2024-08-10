@@ -20,7 +20,7 @@ func (mock *MockHttpClient) Do(req *http.Request) (res *http.Response, err error
 func TestHttpClient(t *testing.T) {
 	t.Run("Get() calls internal http client", func(t *testing.T) {
 		mock_http := MockHttpClient{}
-		client := HttpClient{http: &mock_http}
+		client := HttpClient{Http: &mock_http}
 		_, err := client.Get("https://test.deribit.com/api/v2/")
 		if err != nil {
 			t.Fatalf("unexpected error when performing GET request: %v", err)
@@ -31,6 +31,20 @@ func TestHttpClient(t *testing.T) {
 		if !reflect.DeepEqual(have, want) {
 			t.Fatalf("unexpected request log - have %v, want %v", have, want)
 		}
+	})
 
+	t.Run("Post() calls internal http client", func(t *testing.T) {
+		mock_http := MockHttpClient{}
+		client := HttpClient{Http: &mock_http}
+		_, err := client.Post("https://test.deribit.com/api/v2/", "")
+		if err != nil {
+			t.Fatalf("unexpected error when performing POST request: %v", err)
+		}
+
+		have := mock_http.requests
+		want := []string{"POST https://test.deribit.com/api/v2/"}
+		if !reflect.DeepEqual(have, want) {
+			t.Fatalf("unexpected request log - have %v, want %v", have, want)
+		}
 	})
 }
