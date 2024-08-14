@@ -17,7 +17,7 @@ func main() {
 		panic(err)
 	}
 
-	res, err := client.Get(jsonrpchttp.MessageRequest{
+	res, err := client.Get(jsonrpchttp.MessageRequest[any]{
 		JsonRpc: "2.0",
 		Id:      1111,
 		Method:  "public/get_instruments",

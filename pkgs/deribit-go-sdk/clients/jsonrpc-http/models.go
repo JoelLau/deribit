@@ -1,15 +1,15 @@
 package jsonrpchttp
 
-type MessageRequest struct {
+type MessageRequest[Params any] struct {
 	JsonRpc string `json:"jsonrpc"`
 	Id      int    `json:"id"`
 	Method  string `json:"method"`
-	Params  any    `json:"params"`
+	Params  Params `json:"params"`
 }
 
-type MessageResponse struct {
+type MessageResponse[Result any] struct {
 	Id      int          `json:"id"`
-	Result  any          `json:"result"`
+	Result  Result       `json:"result"`
 	Error   ErrorMessage `json:"error"`
 	TestNet bool         `json:"testnet"`
 	UsIn    int          `json:"usIn"`

@@ -13,9 +13,9 @@ import (
 
 // "low" level client that operates on MessageRequests and MessagesResponses
 type JsonRpcClient struct {
-	Http   Httper
-	config ClientConfig
-	loggr  Logger // avoid direct usage, use Logger() instead
+	Http    Httper
+	config  ClientConfig
+	slogger Logger // avoid direct usage, use Logger() instead
 }
 
 type Logger interface {
@@ -45,26 +45,26 @@ func NewJsonRpcClient(config ClientConfig) (c *JsonRpcClient, err error) {
 	c = &JsonRpcClient{}
 	c.Http = http.NewHttpClient()
 	c.config = config
-	c.loggr = c.Logger()
+	c.slogger = c.Logger()
 
 	return
 }
 
 func (c *JsonRpcClient) Logger() Logger {
-	if c.loggr != nil {
-		return c.loggr
+	if c.slogger != nil {
+		return c.slogger
 	}
 
 	opts := &slog.HandlerOptions{Level: slog.Level(99)}
 	if c.config.Verbose {
 		opts.Level = slog.LevelDebug
 	}
-	c.loggr = slog.New(slog.NewTextHandler(os.Stderr, opts))
+	c.slogger = slog.New(slog.NewTextHandler(os.Stderr, opts))
 
-	return c.loggr
+	return c.slogger
 }
 
-func (c *JsonRpcClient) Get(request MessageRequest) (res MessageResponse, err error) {
+func (c *JsonRpcClient) Get(request MessageRequest[any]) (res MessageResponse[any], err error) {
 	u, err := c.Url(request)
 	if err != nil {
 		err = fmt.Errorf("error deriving URL from request: %w", err)
@@ -95,7 +95,7 @@ func (c *JsonRpcClient) Get(request MessageRequest) (res MessageResponse, err er
 	return
 }
 
-func (c *JsonRpcClient) Post(request MessageRequest) (res MessageResponse, err error) {
+func (c *JsonRpcClient) Post(request MessageRequest[any]) (res MessageResponse[any], err error) {
 	u, err := c.Url(request)
 	if err != nil {
 		err = fmt.Errorf("error deriving URL from request: %w", err)
@@ -114,11 +114,11 @@ func (c *JsonRpcClient) Post(request MessageRequest) (res MessageResponse, err e
 	return
 }
 
-func (c *JsonRpcClient) Url(request MessageRequest) (u url.URL, err error) {
+func (c *JsonRpcClient) Url(request MessageRequest[any]) (u url.URL, err error) {
 	u = url.URL{}
 	u.Scheme = "https"
 	u.Host = c.config.Host
-	u.Path = fmt.Sprintf("api/v2/%s", request.Method)
+	u.Path = fmt.Sprintf("%s%s", "api/v2/", request.Method)
 
 	return
 }
